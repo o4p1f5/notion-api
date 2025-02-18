@@ -5,7 +5,7 @@ const databaseId = "Notion DataBase ID";
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-async function addItem(repositoryName, user, version, multiSelectOption, message) {
+async function addItem(repositoryName, branch, user, version, multiSelectOption, message) {
     try {
         const response = await notion.pages.create({
         parent: { database_id: databaseId },
@@ -15,6 +15,15 @@ async function addItem(repositoryName, user, version, multiSelectOption, message
                         {
                             "text": {
                                 "content": repositoryName
+                            }
+                    }
+                ]
+            },
+            "Branch": { 
+                rich_text:[
+                        {
+                            "text": {
+                                "content": branch
                             }
                     }
                 ]
@@ -65,6 +74,9 @@ async function main(args) {
     // Repo
     const repositoryName = args.repository.name;
 
+    // Branch
+    const ref_branch = args.event.payload.ref;
+    const branch = ref_branch.split('/').pop();
 
     // user
     const senderUserId = args.event.payload.sender.user_id;
@@ -145,7 +157,7 @@ async function main(args) {
     } 
     console.log(newVersion)
 
-    addItem(repositoryName, senderUserId, newVersion, options, commitMessages[0]);
+    addItem(repositoryName, branch, senderUserId, newVersion, options, commitMessages[0]);
 }
 
 // NCP Cloud Function에서 main을 실행할 수 있도록 수정
